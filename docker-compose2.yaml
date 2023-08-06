@@ -1,0 +1,33 @@
+version: '3.3'
+
+services:
+  world:
+    image: helloworld-laravel:latest 
+    container_name: hello-world-laravel
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "250m"
+    tty: true
+    working_dir: /var/www/helloworld
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www/helloworld/public
+    ports:
+      - 80
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.world.entrypoints=http"
+      - "traefik.http.routers.world.rule=Host(`$SERVICE_NAME`)"
+      - "traefik.http.routers.world.service=world"
+      - "traefik.http.services.world.loadbalancer.server.port=80"
+
+networks:
+  proxy:
+    external: true
+
